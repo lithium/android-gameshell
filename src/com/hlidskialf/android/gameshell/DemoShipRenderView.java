@@ -127,5 +127,12 @@ public class DemoShipRenderView extends GLSurfaceView
 
         if (x > 0 || x < 0) mShip.origin.x += x*max_speed;
         if (y > 0 || y < 0) mShip.origin.y += y*max_speed;
+
+
+        double angle = Math.atan(x / y) * 180 / Math.PI;
+        angle = y > 0 ? 90 + angle : 270 + angle;
+
+        mShip.angle = 270f - (float)angle;
+
     }
 }

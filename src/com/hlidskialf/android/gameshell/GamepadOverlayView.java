@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Paint;
 import android.util.Log;
+import android.util.FloatMath;
 
 
 public class GamepadOverlayView extends View
@@ -42,9 +43,14 @@ public class GamepadOverlayView extends View
         super(context,attrs,style);
 
         paint_radius = new Paint();
-        paint_radius.setColor(Color.RED);
-        paint_radius.setStyle(Paint.Style.STROKE);
-        paint_radius.setStrokeWidth(0.5f);
+        paint_radius.setColor(Color.BLUE);
+        paint_radius.setStyle(Paint.Style.FILL);
+        paint_radius.setAlpha(32);
+
+        paint_stick = new Paint();
+        paint_stick.setColor(Color.RED);
+        paint_stick.setStyle(Paint.Style.STROKE);
+        paint_stick.setStrokeWidth(.5f);
     }
 
     @Override
@@ -57,8 +63,10 @@ public class GamepadOverlayView extends View
             canvas.save();
             canvas.drawCircle(mJoystickOrigin.x, mJoystickOrigin.y, JOYSTICK_RADIUS, paint_radius);
 
-            if (mJoystickLast.x != -1)
-                canvas.drawLine(mJoystickOrigin.x, mJoystickOrigin.y, mJoystickLast.x, mJoystickLast.y, paint_radius);
+            if (mJoystickLast.x != -1) {
+                canvas.drawLine(mJoystickOrigin.x, mJoystickOrigin.y, 
+                    mJoystickLast.x, mJoystickLast.y, paint_stick);
+            }
             canvas.restore();
         }
 
@@ -119,4 +127,5 @@ public class GamepadOverlayView extends View
 
 
     Paint paint_radius;
+    Paint paint_stick;
 }

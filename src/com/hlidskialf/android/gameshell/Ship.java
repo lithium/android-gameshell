@@ -19,6 +19,7 @@ public class Ship
     FloatBuffer v_buffer;
     PointF origin;
     PointF accel;
+    float angle;
 
 
     public Ship(float width)
@@ -30,12 +31,15 @@ public class Ship
 
     public void draw(GL10 gl)
     {
+        gl.glPushMatrix();
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 
+        gl.glRotatef(angle, 0f, 0f, 1f);
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, v_buffer);
         gl.glDrawArrays(GL10.GL_LINE_LOOP, 0, vertices.length / 3);
 
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glPopMatrix();
     }
 
 
