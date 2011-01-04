@@ -30,6 +30,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 
 public class DemoShipRenderView extends GLSurfaceView
+                implements GamepadOverlayView.OnJoystickListener
 
 {
 
@@ -55,6 +56,7 @@ public class DemoShipRenderView extends GLSurfaceView
     Handler mHandler;
     GLSurfaceView.Renderer mRenderer;
     Ship mShip;
+    int mViewWidth, mViewHeight;
 
 
     private class ShipRenderer implements GLSurfaceView.Renderer
@@ -71,6 +73,8 @@ public class DemoShipRenderView extends GLSurfaceView
 
         public void onSurfaceChanged(GL10 gl, int w, int h)
         {
+            mViewWidth = w;
+            mViewHeight = h;
             gl.glViewport(0,0,w,h);
 
             gl.glMatrixMode(GL10.GL_PROJECTION);
@@ -83,19 +87,45 @@ public class DemoShipRenderView extends GLSurfaceView
 
         public void onDrawFrame(GL10 gl)
         {
+            tick();
+
             gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
             gl.glLoadIdentity();
 
 
-
             gl.glPushMatrix();
 
-            gl.glTranslatef(100f, 100f, 0f);
+
+            gl.glTranslatef(mShip.origin.x, mShip.origin.y, 0f);
             mShip.draw(gl);
+
 
             gl.glPopMatrix();
         }
 
+
+        private void tick()
+        {
+            mShip.origin.x += mShip.accel.x;
+            mShip.origin.y += mShip.accel.y;
+
+            if (mShip.origin.x > mViewWidth) mShip.origin.x = 0;
+            else if (mShip.origin.x < 0) mShip.origin.x = mViewWidth;
+
+            if (mShip.origin.y > mViewHeight) mShip.origin.y = 0;
+            else if (mShip.origin.y < 0) mShip.origin.y = mViewHeight;
+
+        }
+
     }
 
+
+
+    public void onJoystickEvent(float x, float y)
+    {
+        float max_speed = 10f;
+
+        if (x > 0 || x < 0) mShip.origin.x += x*max_speed;
+        if (y > 0 || y < 0) mShip.origin.y += y*max_speed;
+    }
 }
