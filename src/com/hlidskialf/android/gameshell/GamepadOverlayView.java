@@ -18,8 +18,8 @@ import android.util.FloatMath;
 public class GamepadOverlayView extends View
 {
     private static final float JOYSTICK_RADIUS=60f;
-    private static final float BUTTON_RADIUS=20f;
-    private static final float BUTTON_OFFSET=40f;
+    private static final float BUTTON_RADIUS=30f;
+    private static final float BUTTON_OFFSET=38f;
 
 
 
@@ -113,6 +113,15 @@ public class GamepadOverlayView extends View
         }
 
 
+        if (mTouchRadius > 0) {
+            canvas.save();
+
+            canvas.drawCircle(mTouchOrigin.x, mTouchOrigin.y, mTouchRadius, paint_radius);
+
+            canvas.restore();
+        }
+
+
         canvas.restore();
     }
 
@@ -133,8 +142,11 @@ public class GamepadOverlayView extends View
 
         if (x < mWidth/2) {
             joystick_touch(ev);
+            Log.v("Gamepad", "stick event: "+pointer);
         }
         else if (!mIsJoystick || mJoystickPointerId != pointer) {
+            Log.v("Gamepad", "button event: "+pointer);
+
             if (mIsButton) {
                 button_touch(ev);
             }
@@ -164,6 +176,11 @@ public class GamepadOverlayView extends View
     int mButtonBPointerId = -1;
     int mButtonState;
 
+
+    PointF mTouchOrigin = new PointF(-1f,-1f);
+    float mTouchRadius = -1;
+
+
     Paint paint_radius;
     Paint paint_stick;
     Paint paint_button;
@@ -187,6 +204,7 @@ public class GamepadOverlayView extends View
             case MotionEvent.ACTION_UP:
                 if (mIsJoystick && pointer == mJoystickPointerId) {
                     mIsJoystick = false;
+                    mJoystickPointerId = -1;
                     if (mJoystickListener != null) {
                         mJoystickListener.onJoystickUp();
                     }
@@ -200,6 +218,7 @@ public class GamepadOverlayView extends View
                     mIsJoystick = true;
                     mJoystickOrigin.set(ev.getX(index), ev.getY(index));
                     mJoystickPointerId = pointer;
+                    Log.v("Gamepad", "joystick = "+pointer);
                     invalidate();
                 }
                 break;
@@ -234,58 +253,61 @@ public class GamepadOverlayView extends View
         {
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
-                if (mIsButton) {
-                    mButtonState = 0;
-                    int which=0;
-                    if (pointer == mButtonAPointerId) {
-                        which = BUTTON_A;
-                        mButtonAPointerId = -1;
-                    }
-                    else
-                    if (pointer == mButtonBPointerId) {
-                        which = BUTTON_B;
-                        mButtonBPointerId = -1;
-                    }
+                mButtonState = 0;
+                int which=0;
+                if (pointer == mButtonAPointerId) {
+                    which = BUTTON_A;
+                    mButtonAPointerId = -1;
+                }
+                else
+                if (pointer == mButtonBPointerId) {
+                    which = BUTTON_B;
+                    mButtonBPointerId = -1;
+                }
 
-                    if (mButtonsListener != null)  {
-                        mButtonsListener.onButtonUp(which);
-                    }
+                if (mButtonsListener != null)  {
+                    mButtonsListener.onButtonUp(which);
                 }
                 invalidate();
                 break;
 
+            case MotionEvent.ACTION_MOVE:
             case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_DOWN:
-                if (mIsButton) {
-                    float x = ev.getX(index);
-                    float y = ev.getY(index);
-                    float r = ev.getSize(index);
+                float x = ev.getX(index);
+                float y = ev.getY(index);
+                float r = (ev.getSize(index) * mWidth)/2f;
 
+                mTouchOrigin.set(x,y);
+                mTouchRadius = r;
 
-                    if (circle_collide(mButtonsOrigin.x - BUTTON_OFFSET, mButtonsOrigin.y, BUTTON_RADIUS, x,y,r)) {
-                        // B button pressed
-                        mButtonState |= BUTTON_B;
-                        mButtonBPointerId = pointer;
+                if (circle_collide(mButtonsOrigin.x - BUTTON_OFFSET, mButtonsOrigin.y, BUTTON_RADIUS, x,y,r)) {
+                    // B button pressed
+                    mButtonState |= BUTTON_B;
+                    mButtonBPointerId = pointer;
 
-                        if (mButtonsListener != null) 
-                            mButtonsListener.onButtonDown(BUTTON_B);
+                    Log.v("Gamepad", "b = "+pointer);
 
-                    } else {
-                        mButtonState &= ~BUTTON_B;
-                    }
+                    if (mButtonsListener != null) 
+                        mButtonsListener.onButtonDown(BUTTON_B);
 
-                    if (circle_collide(mButtonsOrigin.x + BUTTON_OFFSET, mButtonsOrigin.y, BUTTON_RADIUS, x,y,r)) {
-                        // A button pressed
-                        mButtonState |= BUTTON_A;
-                        mButtonAPointerId = pointer;
-
-                        if (mButtonsListener != null) 
-                            mButtonsListener.onButtonDown(BUTTON_A);
-                    } else {
-                        mButtonState &= ~BUTTON_A;
-                    }
-
+                } else {
+                    mButtonState &= ~BUTTON_B;
                 }
+
+                if (circle_collide(mButtonsOrigin.x + BUTTON_OFFSET, mButtonsOrigin.y, BUTTON_RADIUS, x,y,r)) {
+                    // A button pressed
+                    mButtonState |= BUTTON_A;
+                    mButtonAPointerId = pointer;
+
+                    Log.v("Gamepad", "a = "+pointer);
+
+                    if (mButtonsListener != null) 
+                        mButtonsListener.onButtonDown(BUTTON_A);
+                } else {
+                    mButtonState &= ~BUTTON_A;
+                }
+
                 invalidate();
                 break;
 
