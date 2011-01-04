@@ -28,6 +28,7 @@ public class GamepadOverlayView extends View
 
     public interface OnJoystickListener {
         public void onJoystickEvent(float x, float y);
+        public void onJoystickUp();
     }
 
     public interface OnDpadListener {
@@ -86,6 +87,16 @@ public class GamepadOverlayView extends View
         int action = ev.getActionMasked();
         switch (action)
         {
+            case MotionEvent.ACTION_POINTER_UP:
+            case MotionEvent.ACTION_UP:
+                if (mIsJoystick) {
+                    mIsJoystick = false;
+                    if (mJoystickListener != null) {
+                        mJoystickListener.onJoystickUp();
+                    }
+                }
+                break;
+
             case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_DOWN:
                 mIsJoystick = true;

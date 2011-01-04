@@ -123,16 +123,20 @@ public class DemoShipRenderView extends GLSurfaceView
 
     public void onJoystickEvent(float x, float y)
     {
-        float max_speed = 10f;
+        float max_speed = 5f;
 
-        if (x > 0 || x < 0) mShip.origin.x += x*max_speed;
-        if (y > 0 || y < 0) mShip.origin.y += y*max_speed;
+        //if (x > 0 || x < 0) mShip.origin.x += x*max_speed;
+        //if (y > 0 || y < 0) mShip.origin.y += y*max_speed;
+        mShip.accel.set(x*max_speed, y*max_speed);
 
 
         double angle = Math.atan(x / y) * 180 / Math.PI;
         angle = y > 0 ? 90 + angle : 270 + angle;
 
         mShip.angle = 270f - (float)angle;
-
+    }
+    public void onJoystickUp()
+    {
+        mShip.accel.set(0f,0f);
     }
 }
