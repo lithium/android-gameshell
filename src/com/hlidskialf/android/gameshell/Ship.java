@@ -20,6 +20,7 @@ public class Ship
     PointF origin;
     PointF accel;
     float angle;
+    boolean is_thrust;
 
 
     public Ship(float width)

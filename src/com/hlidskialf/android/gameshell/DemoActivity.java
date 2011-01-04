@@ -16,6 +16,7 @@ public class DemoActivity extends Activity
         mRenderView.start();
         GamepadOverlayView mGamepad = (GamepadOverlayView)findViewById(R.id.gamepad);
         mGamepad.setOnJoystickListener(mRenderView);
+        mGamepad.setOnButtonsListener(mRenderView);
     }
 
     @Override

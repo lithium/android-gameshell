@@ -31,6 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class DemoShipRenderView extends GLSurfaceView
                 implements GamepadOverlayView.OnJoystickListener
+                          ,GamepadOverlayView.OnButtonsListener
 
 {
 
@@ -83,6 +84,8 @@ public class DemoShipRenderView extends GLSurfaceView
 
             gl.glMatrixMode(GL10.GL_MODELVIEW);
             gl.glLoadIdentity();
+
+            mShip.origin.set(w/2, h/2);
         }
 
         public void onDrawFrame(GL10 gl)
@@ -106,8 +109,10 @@ public class DemoShipRenderView extends GLSurfaceView
 
         private void tick()
         {
-            mShip.origin.x += mShip.accel.x;
-            mShip.origin.y += mShip.accel.y;
+            if (mShip.is_thrust) {
+                mShip.origin.x += mShip.accel.x;
+                mShip.origin.y += mShip.accel.y;
+            }
 
             if (mShip.origin.x > mViewWidth) mShip.origin.x = 0;
             else if (mShip.origin.x < 0) mShip.origin.x = mViewWidth;
@@ -121,14 +126,11 @@ public class DemoShipRenderView extends GLSurfaceView
 
 
 
+
     public void onJoystickEvent(float x, float y)
     {
         float max_speed = 5f;
-
-        //if (x > 0 || x < 0) mShip.origin.x += x*max_speed;
-        //if (y > 0 || y < 0) mShip.origin.y += y*max_speed;
         mShip.accel.set(x*max_speed, y*max_speed);
-
 
         double angle = Math.atan(x / y) * 180 / Math.PI;
         angle = y > 0 ? 90 + angle : 270 + angle;
@@ -138,5 +140,22 @@ public class DemoShipRenderView extends GLSurfaceView
     public void onJoystickUp()
     {
         mShip.accel.set(0f,0f);
+    }
+
+    public void onButtonUp(int which)
+    {
+        switch (which) {
+            case GamepadOverlayView.BUTTON_B:
+                mShip.is_thrust = false;
+                break;
+        }
+    }
+    public void onButtonDown(int which)
+    {
+        switch (which) {
+            case GamepadOverlayView.BUTTON_B:
+                mShip.is_thrust = true;
+                break;
+        }
     }
 }

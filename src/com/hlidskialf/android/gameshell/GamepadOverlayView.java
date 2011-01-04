@@ -33,6 +33,10 @@ public class GamepadOverlayView extends View
     {
         mJoystickListener = lstnr;
     }
+    public void setOnButtonsListener(OnButtonsListener lstnr)
+    {
+        mButtonsListener = lstnr;
+    }
 
     public interface OnJoystickListener {
         public void onJoystickEvent(float x, float y);
@@ -42,6 +46,12 @@ public class GamepadOverlayView extends View
     public interface OnDpadListener {
         public void onDpadEvent(int direction);
     }
+
+    public interface OnButtonsListener {
+        public void onButtonDown(int which);
+        public void onButtonUp(int which);
+    }
+
 
 
 
@@ -150,6 +160,8 @@ public class GamepadOverlayView extends View
 
     PointF mButtonsOrigin = new PointF(-1f,-1f);
     boolean mIsButton = false;
+    int mButtonAPointerId = -1;
+    int mButtonBPointerId = -1;
     int mButtonState;
 
     Paint paint_radius;
@@ -158,6 +170,7 @@ public class GamepadOverlayView extends View
     Paint paint_button_press;
 
     OnJoystickListener mJoystickListener;
+    OnButtonsListener mButtonsListener;
     GestureDetector mGestureDetector;
 
 
@@ -223,6 +236,20 @@ public class GamepadOverlayView extends View
             case MotionEvent.ACTION_UP:
                 if (mIsButton) {
                     mButtonState = 0;
+                    int which=0;
+                    if (pointer == mButtonAPointerId) {
+                        which = BUTTON_A;
+                        mButtonAPointerId = -1;
+                    }
+                    else
+                    if (pointer == mButtonBPointerId) {
+                        which = BUTTON_B;
+                        mButtonBPointerId = -1;
+                    }
+
+                    if (mButtonsListener != null)  {
+                        mButtonsListener.onButtonUp(which);
+                    }
                 }
                 invalidate();
                 break;
@@ -238,6 +265,11 @@ public class GamepadOverlayView extends View
                     if (circle_collide(mButtonsOrigin.x - BUTTON_OFFSET, mButtonsOrigin.y, BUTTON_RADIUS, x,y,r)) {
                         // B button pressed
                         mButtonState |= BUTTON_B;
+                        mButtonBPointerId = pointer;
+
+                        if (mButtonsListener != null) 
+                            mButtonsListener.onButtonDown(BUTTON_B);
+
                     } else {
                         mButtonState &= ~BUTTON_B;
                     }
@@ -245,6 +277,10 @@ public class GamepadOverlayView extends View
                     if (circle_collide(mButtonsOrigin.x + BUTTON_OFFSET, mButtonsOrigin.y, BUTTON_RADIUS, x,y,r)) {
                         // A button pressed
                         mButtonState |= BUTTON_A;
+                        mButtonAPointerId = pointer;
+
+                        if (mButtonsListener != null) 
+                            mButtonsListener.onButtonDown(BUTTON_A);
                     } else {
                         mButtonState &= ~BUTTON_A;
                     }
