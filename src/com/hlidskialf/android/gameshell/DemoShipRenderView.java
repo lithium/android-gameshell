@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.opengl.GLSurfaceView;
@@ -38,6 +37,8 @@ public class DemoShipRenderView extends GLSurfaceView
     public DemoShipRenderView(Context context, AttributeSet attrs)
     {
         super(context,attrs);
+
+        mShip = new Ship(32f);
     }
 
     public void start()
@@ -53,21 +54,46 @@ public class DemoShipRenderView extends GLSurfaceView
     /* private */
     Handler mHandler;
     GLSurfaceView.Renderer mRenderer;
+    Ship mShip;
 
 
     private class ShipRenderer implements GLSurfaceView.Renderer
     {
 
+
         public void onSurfaceCreated(GL10 gl, EGLConfig config)
         {
+            gl.glClearColor(0f,0f,0f, 0.5f);
+            gl.glDisable(GL10.GL_DEPTH_TEST);
+
+            gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
         }
 
-        public void onSurfaceChanged(GL10 gl, int width, int height)
+        public void onSurfaceChanged(GL10 gl, int w, int h)
         {
+            gl.glViewport(0,0,w,h);
+
+            gl.glMatrixMode(GL10.GL_PROJECTION);
+            gl.glLoadIdentity();
+            GLU.gluOrtho2D(gl, 0f, (float)w, (float)h, 0f);
+
+            gl.glMatrixMode(GL10.GL_MODELVIEW);
+            gl.glLoadIdentity();
         }
 
         public void onDrawFrame(GL10 gl)
         {
+            gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+            gl.glLoadIdentity();
+
+
+
+            gl.glPushMatrix();
+
+            gl.glTranslatef(100f, 100f, 0f);
+            mShip.draw(gl);
+
+            gl.glPopMatrix();
         }
 
     }
