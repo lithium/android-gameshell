@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-<TextView  
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="Hello World, DemoActivity"
-    />
-</LinearLayout>
 
+    <com.hlidskialf.android.gameshell.DemoShipRenderView android:id="@+id/renderer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        />
+
+    <com.hlidskialf.android.gameshell.GamepadOverlayView android:id="@+id/gamepad"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="#00000000"
+        />
+
+</FrameLayout>
