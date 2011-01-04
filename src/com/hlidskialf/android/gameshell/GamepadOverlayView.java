@@ -124,13 +124,14 @@ public class GamepadOverlayView extends View
         if (x < mWidth/2) {
             joystick_touch(ev);
         }
-        else if (pointer != mJoystickPointerId) {
-            if (!mGestureDetector.onTouchEvent(ev)) {
+        else if (!mIsJoystick || mJoystickPointerId != pointer) {
+            if (mIsButton) {
                 button_touch(ev);
             }
+            else
+                mGestureDetector.onTouchEvent(ev);
         }
 
-        invalidate();
         return true;
     }
 
@@ -176,6 +177,7 @@ public class GamepadOverlayView extends View
                     if (mJoystickListener != null) {
                         mJoystickListener.onJoystickUp();
                     }
+                    invalidate();
                 }
                 break;
 
@@ -185,6 +187,7 @@ public class GamepadOverlayView extends View
                     mIsJoystick = true;
                     mJoystickOrigin.set(ev.getX(index), ev.getY(index));
                     mJoystickPointerId = pointer;
+                    invalidate();
                 }
                 break;
 
@@ -203,6 +206,7 @@ public class GamepadOverlayView extends View
                     if (mJoystickListener != null) {
                         mJoystickListener.onJoystickEvent(x,y);
                     }
+                    invalidate();
                 }
                 break;
         }
@@ -220,6 +224,7 @@ public class GamepadOverlayView extends View
                 if (mIsButton) {
                     mButtonState = 0;
                 }
+                invalidate();
                 break;
 
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -244,8 +249,8 @@ public class GamepadOverlayView extends View
                         mButtonState &= ~BUTTON_A;
                     }
 
-                    invalidate();
                 }
+                invalidate();
                 break;
 
         }
