@@ -85,11 +85,14 @@ public class GamepadOverlayView extends View
     public boolean onTouchEvent(MotionEvent ev)
     {
         int action = ev.getActionMasked();
+        int index = ev.getActionIndex();
+        int pointer = ev.getPointerId(index);
+
         switch (action)
         {
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
-                if (mIsJoystick) {
+                if (mIsJoystick && pointer == mJoystickPointerId) {
                     mIsJoystick = false;
                     if (mJoystickListener != null) {
                         mJoystickListener.onJoystickUp();
@@ -99,13 +102,15 @@ public class GamepadOverlayView extends View
 
             case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_DOWN:
-                mIsJoystick = true;
-                mJoystickOrigin.set(ev.getX(), ev.getY());
-                invalidate();
+                if (!mIsJoystick) {
+                    mIsJoystick = true;
+                    mJoystickOrigin.set(ev.getX(index), ev.getY(index));
+                    mJoystickPointerId = pointer;
+                }
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if (mJoystickListener != null) {
+                if (mIsJoystick && pointer == mJoystickPointerId) {
                     float x = ev.getX();
                     float y = ev.getY();
                     mJoystickLast.set(x,y);
@@ -116,13 +121,13 @@ public class GamepadOverlayView extends View
                     x = x < -1f ? -1f : x > 1f ? 1f : x;
                     y = y < -1f ? -1f : y > 1f ? 1f : y;
 
-                    if (mJoystickListener != null)
+                    if (mJoystickListener != null) {
                         mJoystickListener.onJoystickEvent(x,y);
-
-                    invalidate();
+                    }
                 }
                 break;
         }
+        invalidate();
         return true;
     }
 
@@ -130,9 +135,11 @@ public class GamepadOverlayView extends View
     OnJoystickListener mJoystickListener;
 
     int mWidth, mHeight;
+
     PointF mJoystickOrigin = new PointF(-1f,-1f);
     boolean mIsJoystick = false;
     PointF mJoystickLast = new PointF(-1f,-1f);
+    int mJoystickPointerId = -1;
 
     PointF mButtonsOrigin = new PointF(-1f,-1f);
 
