@@ -2,6 +2,8 @@ package com.hlidskialf.android.gameshell;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
+import android.content.pm.PackageManager;
 
 public class DemoActivity extends Activity
 {
@@ -11,6 +13,11 @@ public class DemoActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+
+        PackageManager pm = getPackageManager();
+        boolean has_multi = pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT);
+        Log.v("Gamepad", "has distinct multitouch? "+has_multi);
 
         mRenderView = (DemoShipRenderView)findViewById(R.id.renderer);
         mRenderView.start();

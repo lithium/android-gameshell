@@ -66,7 +66,7 @@ public class GamepadOverlayView extends View
         paint_radius = new Paint();
         paint_radius.setColor(Color.BLUE);
         paint_radius.setStyle(Paint.Style.FILL);
-        paint_radius.setAlpha(32);
+        paint_radius.setAlpha(64);
 
         paint_stick = new Paint();
         paint_stick.setColor(Color.RED);
@@ -142,16 +142,13 @@ public class GamepadOverlayView extends View
 
         if (x < mWidth/2) {
             joystick_touch(ev);
-            Log.v("Gamepad", "stick event: "+pointer);
         }
         else if (!mIsJoystick || mJoystickPointerId != pointer) {
-            Log.v("Gamepad", "button event: "+pointer);
-
-            if (mIsButton) {
-                button_touch(ev);
+            if (!mGestureDetector.onTouchEvent(ev)) {
+                if (mIsButton) {
+                    button_touch(ev);
+                }
             }
-            else
-                mGestureDetector.onTouchEvent(ev);
         }
 
         return true;
@@ -218,7 +215,6 @@ public class GamepadOverlayView extends View
                     mIsJoystick = true;
                     mJoystickOrigin.set(ev.getX(index), ev.getY(index));
                     mJoystickPointerId = pointer;
-                    Log.v("Gamepad", "joystick = "+pointer);
                     invalidate();
                 }
                 break;
@@ -278,6 +274,8 @@ public class GamepadOverlayView extends View
                 float y = ev.getY(index);
                 float r = (ev.getSize(index) * mWidth)/2f;
 
+                Log.v("Gamepad", "button == joystick :: "+y+" = "+mJoystickLast.y);
+
                 mTouchOrigin.set(x,y);
                 mTouchRadius = r;
 
@@ -286,7 +284,6 @@ public class GamepadOverlayView extends View
                     mButtonState |= BUTTON_B;
                     mButtonBPointerId = pointer;
 
-                    Log.v("Gamepad", "b = "+pointer);
 
                     if (mButtonsListener != null) 
                         mButtonsListener.onButtonDown(BUTTON_B);
@@ -299,8 +296,6 @@ public class GamepadOverlayView extends View
                     // A button pressed
                     mButtonState |= BUTTON_A;
                     mButtonAPointerId = pointer;
-
-                    Log.v("Gamepad", "a = "+pointer);
 
                     if (mButtonsListener != null) 
                         mButtonsListener.onButtonDown(BUTTON_A);
@@ -319,6 +314,16 @@ public class GamepadOverlayView extends View
         public void onLongPress(MotionEvent ev)
         {
             int index = ev.getActionIndex();
+            float x = ev.getX(index);
+            float y = ev.getY(index);
+            float r = (ev.getSize(index) * mWidth)/2f;
+
+            if (circle_collide(mButtonsOrigin.x - BUTTON_OFFSET, mButtonsOrigin.y, BUTTON_RADIUS, x,y,r) ||
+                circle_collide(mButtonsOrigin.x + BUTTON_OFFSET, mButtonsOrigin.y, BUTTON_RADIUS, x,y,r)) {
+                // long pressed on a button; ignore
+                return;
+            }
+
             mIsButton = true;
             mButtonsOrigin.set(ev.getX(index), ev.getY(index));
 
